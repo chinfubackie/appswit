@@ -1,0 +1,13 @@
+{
+  "_doc": "Default template when first run on Linux (e.g. Ubuntu 24.04.x). sudo must be non-interactive (NOPASSWD) or use your own script paths.",
+  "ubuntu": {
+    "label": "Linux host — reboot default GRUB entry (index 0)",
+    "command": "/bin/bash",
+    "args": ["-lc", "sudo grub-reboot 0 && sudo reboot"]
+  },
+  "windows": {
+    "label": "Linux host — next boot Windows (edit menu title to match grub.cfg)",
+    "command": "/bin/bash",
+    "args": ["-lc", "sudo grub-reboot 'Windows Boot Manager' && sudo reboot"]
+  }
+}

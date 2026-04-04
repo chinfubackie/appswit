@@ -1,0 +1,12 @@
+{
+  "ubuntu": {
+    "label": "Host Windows → next boot Ubuntu 24.04.4 (configure bcdedit/GRUB entry)",
+    "command": "shutdown.exe",
+    "args": ["/r", "/t", "10", "/c", "AiJIN: Set boot target to Ubuntu 24.04.4 LTS — on Linux host see os-switch.linux-host.example.json."]
+  },
+  "windows": {
+    "label": "Host Windows → next boot Windows stack",
+    "command": "shutdown.exe",
+    "args": ["/r", "/t", "10", "/c", "AiJIN: Edit os-switch.config.json — point windows to your firmware entry."]
+  }
+}

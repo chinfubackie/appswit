@@ -1,0 +1,110 @@
+{
+  "name": "appswit",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "author": "AIJI FORGE THAILAND",
+  "description": "AiJIN OS switcher — dual-boot launcher (Windows / Ubuntu 24.04.x)",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "verify-env": "node scripts/verify-node.mjs",
+    "predev": "node scripts/verify-node.mjs",
+    "prebuild": "node scripts/verify-node.mjs",
+    "preapp": "node scripts/verify-node.mjs",
+    "preapp:prod": "node scripts/verify-node.mjs",
+    "prepreview": "node scripts/verify-node.mjs",
+    "prelint": "node scripts/verify-node.mjs",
+    "dev": "vite",
+    "app": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && cross-env ELECTRON_START_URL=http://127.0.0.1:5173 electron .\"",
+    "app:prod": "vite build && electron .",
+    "build": "vite build",
+    "predist:msi": "node scripts/verify-node.mjs",
+    "predist:win": "node scripts/verify-node.mjs",
+    "predist:linux": "node scripts/verify-node.mjs",
+    "predist:linux:dir": "node scripts/verify-node.mjs",
+    "dist:win": "npm run build && electron-builder --win dir --x64",
+    "dist:msi": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win msi --x64",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb --x64",
+    "dist:linux:dir": "npm run build && electron-builder --linux dir --x64",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.27",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
+    "vite": "^8.0.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^39.2.3",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "th.aiji.appswit",
+    "productName": "AiJIN OS Switcher",
+    "copyright": "Copyright © AIJI FORGE THAILAND",
+    "icon": "build/icon.png",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "forceCodeSigning": false,
+    "win": {
+      "target": [
+        {
+          "target": "msi",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "verifyUpdateCodeSignature": false,
+      "signAndEditExecutable": false
+    },
+    "msi": {
+      "oneClick": false,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": false
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "maintainer": "AIJI FORGE THAILAND",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "executableName": "aijin-os-switcher"
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils"
+      ]
+    }
+  }
+}
