@@ -1,5 +1,5 @@
 {
-  "_doc": "Default template when first run on Linux (e.g. Ubuntu 24.04.x). sudo must be non-interactive (NOPASSWD) or use your own script paths.",
+  "_doc": "Default template when first run on Linux (e.g. Ubuntu 24.04.x). sudo must be non-interactive (NOPASSWD) or use your own script paths. Optional: copy this file next to the AppImage as os-switch.config.json, or set AIJIN_OS_SWITCH_CONFIG to an absolute path (e.g. on a USB drive).",
   "ubuntu": {
     "label": "Linux host — reboot default GRUB entry (index 0)",
     "command": "/bin/bash",

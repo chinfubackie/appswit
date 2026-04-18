@@ -6,7 +6,32 @@ const { spawn, execSync } = require('child_process')
 
 const CONFIG_NAME = 'os-switch.config.json'
 
+/** Absolute path override, e.g. USB: export AIJIN_OS_SWITCH_CONFIG=/media/.../os-switch.config.json */
+function configPathFromEnv() {
+  const raw = process.env.AIJIN_OS_SWITCH_CONFIG
+  if (typeof raw !== 'string') return ''
+  const t = raw.trim()
+  if (!t) return ''
+  return path.resolve(t)
+}
+
+/** Portable Linux: os-switch.config.json next to the AppImage/binary when present */
+function configPathBesideExecutable() {
+  if (process.platform !== 'linux' || !app.isPackaged) return ''
+  try {
+    const beside = path.join(path.dirname(process.execPath), CONFIG_NAME)
+    if (fs.existsSync(beside)) return path.resolve(beside)
+  } catch (e) {
+    console.error('configPathBesideExecutable', e)
+  }
+  return ''
+}
+
 function configPath() {
+  const fromEnv = configPathFromEnv()
+  if (fromEnv) return fromEnv
+  const beside = configPathBesideExecutable()
+  if (beside) return beside
   return path.join(app.getPath('userData'), CONFIG_NAME)
 }
 
@@ -79,6 +104,8 @@ function ensureConfig() {
   const target = configPath()
   if (fs.existsSync(target)) return target
   try {
+    const dir = path.dirname(target)
+    if (dir && dir !== '.') fs.mkdirSync(dir, { recursive: true })
     const example = examplePath()
     if (fs.existsSync(example)) {
       fs.copyFileSync(example, target)
@@ -239,7 +266,8 @@ ipcMain.handle('os-switch:run', async (_event, osId) => {
 
   const args = Array.isArray(entry.args) ? entry.args : []
   const child = spawn(entry.command, args, {
-    shell: true,
+    // Windows needs shell for .exe resolution; Linux/macOS run argv directly (reliable for sudo/grub-reboot).
+    shell: process.platform === 'win32',
     detached: true,
     stdio: 'ignore',
     windowsHide: false,
