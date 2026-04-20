@@ -54,6 +54,7 @@ function getLastOsIndex() {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('boot')
   const [sessionAuthed, setSessionAuthed] = useState(() => {
     try {
       return sessionStorage.getItem(SESSION_KEY) === '1'
@@ -154,6 +155,7 @@ export default function App() {
 
   useEffect(() => {
     if (!sessionAuthed) return undefined
+    if (activeTab !== 'boot') return undefined
     if (menuRef.current) menuRef.current.focus()
     let timer
     if (countdown > 0 && !booting) {
@@ -162,7 +164,7 @@ export default function App() {
       setBooting(true)
     }
     return () => clearTimeout(timer)
-  }, [sessionAuthed, countdown, booting, selectedIndex])
+  }, [sessionAuthed, countdown, booting, selectedIndex, activeTab])
 
   useEffect(() => {
     if (!booting) {
@@ -213,6 +215,7 @@ export default function App() {
       /* ignore */
     }
     setSessionAuthed(false)
+    setActiveTab('boot')
     setBooting(false)
     setCountdown(AUTO_BOOT_SECONDS)
     setLoginId('')
@@ -266,6 +269,7 @@ export default function App() {
 
   const handleKeyDown = (e) => {
     if (!sessionAuthed) return
+    if (activeTab !== 'boot' && !booting) return
     if (booting) {
       if (e.key === 'Escape' && (switchPhase === 'error' || switchPhase === 'done'))
         setBooting(false)
@@ -276,6 +280,12 @@ export default function App() {
     if (e.key === 'ArrowLeft')
       setSelectedIndex((prev) => (prev - 1 + OS_LIST.length) % OS_LIST.length)
     if (e.key === 'Enter') setBooting(true)
+  }
+
+  const triggerBootNow = (nextIndex = selectedIndex) => {
+    setSelectedIndex(nextIndex)
+    setCountdown(AUTO_BOOT_SECONDS)
+    setBooting(true)
   }
 
   return (
@@ -454,6 +464,30 @@ export default function App() {
             <p className="text-white/60">SYS_UPTIME: 0.00021s</p>
             <p className="text-orange-500 font-bold">MODE: HIGH-PERFORMANCE</p>
           </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('boot')}
+              className={`text-[9px] uppercase tracking-widest border px-3 py-1 rounded ${
+                activeTab === 'boot'
+                  ? 'text-black bg-orange-500 border-orange-500'
+                  : 'text-neutral-400 border-white/10 hover:text-orange-400'
+              }`}
+            >
+              Boot
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('control')}
+              className={`text-[9px] uppercase tracking-widest border px-3 py-1 rounded ${
+                activeTab === 'control'
+                  ? 'text-black bg-orange-500 border-orange-500'
+                  : 'text-neutral-400 border-white/10 hover:text-orange-400'
+              }`}
+            >
+              System Control
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleLogout}
@@ -464,6 +498,7 @@ export default function App() {
         </div>
       </div>
 
+      {activeTab === 'boot' && (
       <div className="flex flex-col items-center justify-center min-h-screen pt-20 px-10 relative z-10">
         <div className="mb-16 text-center">
           <div className="inline-block relative mb-4">
@@ -584,6 +619,77 @@ export default function App() {
           })}
         </div>
       </div>
+      )}
+
+      {activeTab === 'control' && (
+      <div className="flex flex-col items-center justify-center min-h-screen pt-20 px-10 relative z-10">
+        <div className="w-full max-w-4xl border border-orange-500/20 rounded-2xl bg-black/55 backdrop-blur-xl p-8">
+          <div className="mb-8">
+            <p className="mono-font text-[10px] text-orange-500/80 tracking-[0.25em] uppercase">
+              System Operations
+            </p>
+            <h2 className="logo-font text-3xl mt-3 tracking-[0.2em]">
+              CONTROL <span className="text-orange-500">PANEL</span>
+            </h2>
+            <p className="mono-font text-[10px] text-neutral-500 mt-3">
+              ควบคุมคำสั่งหลักทั้งหมด: เลือก OS และสั่ง handover, จัดการตัวนับ, เปิดไฟล์ config
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => triggerBootNow(0)}
+              className="mono-font text-xs uppercase tracking-widest rounded-xl border border-orange-500/35 bg-orange-500/15 hover:bg-orange-500/25 px-5 py-4 text-left"
+            >
+              สั่งบูต Ubuntu ทันที
+              <span className="block text-[10px] tracking-normal text-neutral-400 mt-2">
+                เรียกคำสั่งตาม key: ubuntu ใน os-switch.config.json
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => triggerBootNow(1)}
+              className="mono-font text-xs uppercase tracking-widest rounded-xl border border-sky-500/35 bg-sky-500/10 hover:bg-sky-500/20 px-5 py-4 text-left"
+            >
+              สั่งบูต Windows ทันที
+              <span className="block text-[10px] tracking-normal text-neutral-400 mt-2">
+                เรียกคำสั่งตาม key: windows ใน os-switch.config.json
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBooting(false)
+                setCountdown(AUTO_BOOT_SECONDS)
+              }}
+              className="mono-font text-xs uppercase tracking-widest rounded-xl border border-white/15 hover:border-orange-500/35 hover:text-orange-300 px-5 py-4 text-left"
+            >
+              รีเซ็ตตัวนับ Auto-Boot
+              <span className="block text-[10px] tracking-normal text-neutral-500 mt-2">
+                ตั้งกลับเป็น {Math.floor(AUTO_BOOT_SECONDS / 60)} นาที
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => window.osSwitcher?.openConfigFolder?.()}
+              className="mono-font text-xs uppercase tracking-widest rounded-xl border border-white/15 hover:border-orange-500/35 hover:text-orange-300 px-5 py-4 text-left"
+            >
+              เปิดโฟลเดอร์ Config
+              <span className="block text-[10px] tracking-normal text-neutral-500 mt-2">
+                แก้ไข os-switch.config.json ได้จากโฟลเดอร์นี้
+              </span>
+            </button>
+          </div>
+
+          <div className="mt-8 border-t border-white/10 pt-6">
+            <p className="mono-font text-[10px] text-neutral-500 uppercase tracking-widest">
+              Current target: <span className="text-white">{OS_LIST[selectedIndex]?.name}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+      )}
 
       <div className="absolute left-10 bottom-24 w-80 mono-font text-[9px] text-neutral-500 space-y-2 hidden xl:block">
         <div className="flex items-center gap-2 mb-4">
