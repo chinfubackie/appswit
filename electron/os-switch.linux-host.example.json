@@ -9,5 +9,10 @@
     "label": "Linux host — next boot Windows (edit menu title to match grub.cfg)",
     "command": "/bin/bash",
     "args": ["-lc", "sudo grub-reboot 'Windows Boot Manager' && sudo reboot"]
+  },
+  "webreport": {
+    "label": "Linux host — run WebReport service",
+    "command": "/bin/bash",
+    "args": ["-lc", "xdg-open 'http://127.0.0.1:8080'"]
   }
 }

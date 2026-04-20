@@ -81,6 +81,7 @@ export default function App() {
   const [booting, setBooting] = useState(false)
   const [switchPhase, setSwitchPhase] = useState('idle')
   const [switchMessage, setSwitchMessage] = useState('')
+  const [controlMessage, setControlMessage] = useState('')
   const [systemLogs, setSystemLogs] = useState([])
   const menuRef = useRef(null)
 
@@ -286,6 +287,25 @@ export default function App() {
     setSelectedIndex(nextIndex)
     setCountdown(AUTO_BOOT_SECONDS)
     setBooting(true)
+  }
+
+  const runControlAction = async (actionId) => {
+    setControlMessage('')
+    try {
+      const bridge = window.osSwitcher
+      if (!bridge?.run) {
+        setControlMessage('โหมดเว็บไม่รองรับการสั่งคำสั่งระบบ — ให้เปิดผ่าน Electron (npm run app)')
+        return
+      }
+      const res = await bridge.run(actionId)
+      if (res?.ok) {
+        setControlMessage(res.message || `สั่งงาน ${actionId} สำเร็จ`)
+      } else {
+        setControlMessage(res?.error || `สั่งงาน ${actionId} ไม่สำเร็จ`)
+      }
+    } catch (err) {
+      setControlMessage(err instanceof Error ? err.message : String(err))
+    }
   }
 
   return (
@@ -680,12 +700,27 @@ export default function App() {
                 แก้ไข os-switch.config.json ได้จากโฟลเดอร์นี้
               </span>
             </button>
+            <button
+              type="button"
+              onClick={() => runControlAction('webreport')}
+              className="mono-font text-xs uppercase tracking-widest rounded-xl border border-emerald-500/35 bg-emerald-500/10 hover:bg-emerald-500/20 px-5 py-4 text-left md:col-span-2"
+            >
+              Run WebReport
+              <span className="block text-[10px] tracking-normal text-neutral-400 mt-2">
+                เรียกคำสั่งตาม key: webreport ใน os-switch.config.json
+              </span>
+            </button>
           </div>
 
           <div className="mt-8 border-t border-white/10 pt-6">
             <p className="mono-font text-[10px] text-neutral-500 uppercase tracking-widest">
               Current target: <span className="text-white">{OS_LIST[selectedIndex]?.name}</span>
             </p>
+            {controlMessage && (
+              <p className="mono-font text-[10px] text-emerald-400/90 mt-3 normal-case tracking-normal">
+                {controlMessage}
+              </p>
+            )}
           </div>
         </div>
       </div>

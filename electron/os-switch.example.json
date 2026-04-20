@@ -8,5 +8,10 @@
     "label": "Host Windows → next boot Windows stack",
     "command": "shutdown.exe",
     "args": ["/r", "/t", "10", "/c", "AiJIN: Edit os-switch.config.json — point windows to your firmware entry."]
+  },
+  "webreport": {
+    "label": "Open WebReport dashboard",
+    "command": "cmd.exe",
+    "args": ["/c", "start", "", "http://127.0.0.1:8080"]
   }
 }
